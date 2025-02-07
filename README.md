@@ -58,6 +58,22 @@ Before running this pipeline, you need to configure the following in your Jenkin
 5.  **SonarQube Configuration:** Configure SonarQube and create the project "jprofile".
 6.  **Jenkins Server Setup:**  Install Jenkins and configure it as described in the "Jenkins Configuration" section above.
 
+## GitHub Webhook Integration for Automated Triggers
+
+This project leverages GitHub webhooks to automate the CI/CD pipeline.  By configuring a webhook in your GitHub repository, Jenkins is automatically notified of any pushes (or other specified events) to the repository, triggering a new build. This eliminates the need for manual build triggering or polling, ensuring continuous integration and faster feedback.
+
+**How it Works:**
+
+1.  **GitHub Configuration:** A webhook is set up in the GitHub repository's settings, pointing to the Jenkins server's webhook endpoint, A secret is also configured for enhanced security.
+
+2.  **Jenkins Configuration:** The Jenkins job is configured to listen for GitHub webhook events.  The same secret configured in GitHub is also configured in the Jenkins job.
+
+3.  **Code Push:** When a developer pushes code to the GitHub repository, GitHub sends a webhook event (a POST request with information about the push) to the Jenkins server.
+
+4.  **Jenkins Trigger:** Jenkins receives the webhook event, verifies the secret (if configured), and if valid, triggers the pipeline build.
+
+5.  **CI/CD Process:** The pipeline then proceeds with the defined stages (build, test, analyze, deploy, etc.).
+
 ## Running the Pipeline
 
 1.  Create a new Pipeline job in Jenkins.
