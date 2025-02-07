@@ -1,4 +1,4 @@
-# jpro App Jenkins Pipeline 🚀
+# jpro Jenkins Pipeline 🚀
 
 This project defines a Jenkins pipeline for building, testing, analyzing, and deploying the jpro application. It integrates with Maven, SonarQube, and Nexus, running within an AWS environment. ☁️
 
