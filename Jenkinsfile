@@ -1,4 +1,4 @@
-#Build the project from Nexus Repository
+#project pipeline jenkins project jpro App
 
 pipeline {
     agent any
@@ -13,7 +13,7 @@ pipeline {
 		NEXUS_PASS = 'Nexuspassword' # Chage it to Password for Nexus Repository
 		RELEASE_REPO = 'jpro-release'
 		CENTRAL_REPO = 'jpro-maven-central'
-		NEXUSIP = '172.31.43.144' # ip address of Nexus Repository Server EC2
+		NEXUSIP = '172.31.43.144' # ip address of Nexus Repository Server EC2 should be private ip
 		NEXUSPORT = '8081'
 		NEXUS_GRP_REPO = 'jpro-maven-group'
         NEXUS_LOGIN = 'nexuslogin' # Credential name for Nexus Repository in Jenkins
@@ -53,7 +53,7 @@ pipeline {
             steps {            # SonarQube Scanner documentation example
                withSonarQubeEnv("${SONARSERVER}") {
                    sh '''${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=jprofile \
-                   -Dsonar.projectName=vprofile \
+                   -Dsonar.projectName=jprofile \
                    -Dsonar.projectVersion=1.0 \
                    -Dsonar.sources=src/ \
                    -Dsonar.java.binaries=target/test-classes/com/visualpathit/account/controllerTest/ \
@@ -62,6 +62,34 @@ pipeline {
                    -Dsonar.java.checkstyle.reportPaths=target/checkstyle-result.xml'''
               }
             }  
-        }    
+        }
+                stage("Quality Gate") {
+            steps {
+                timeout(time: 1, unit: 'HOURS') {
+                    // Parameter indicates whether to set pipeline to UNSTABLE if Quality Gate fails
+                    // true = set pipeline to UNSTABLE, false = don't
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
+        stage("UploadArtifact"){     # google search for jenkins nexus artifact uploade  https://plugins.jenkins.io/nexus-artifact-uploader/
+            steps{
+                nexusArtifactUploader(
+                  nexusVersion: 'nexus3',
+                  protocol: 'http',
+                  nexusUrl: "${NEXUSIP}:${NEXUSPORT}",
+                  groupId: 'QA',
+                  version: "${env.BUILD_ID}-${env.BUILD_TIMESTAMP}",
+                  repository: "${RELEASE_REPO}",
+                  credentialsId: "${NEXUS_LOGIN}",
+                  artifacts: [
+                    [artifactId: 'jproapp',
+                     classifier: '',
+                     file: 'target/jprofile-v2.war',
+                     type: 'war']
+                  ]
+                )
+            }
+        }
     }
 }
